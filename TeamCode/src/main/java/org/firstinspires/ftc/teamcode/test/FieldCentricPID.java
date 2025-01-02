@@ -1,7 +1,5 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.qualcomm.ftccommon.configuration.EditLynxModuleActivity;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -11,12 +9,10 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //@TeleOp (name = "Field Centric PID")
-@Config
+//@Config
 @Disabled
 
 public class FieldCentricPID extends OpMode {
@@ -44,8 +40,6 @@ public class FieldCentricPID extends OpMode {
     ElapsedTime timer = new ElapsedTime();
 
     // FTC Dashboard
-    FtcDashboard dashboard = FtcDashboard.getInstance();
-    TelemetryPacket packet = new TelemetryPacket();
 
     @Override
     public void init() {

@@ -4,7 +4,9 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.VelConstraint;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
@@ -15,111 +17,163 @@ public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(650);
 
-        RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
-                .setConstraints(120, 120, Math.toRadians(180), Math.toRadians(180), 15)
+        RoadRunnerBotEntity rightNoSpline = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setConstraints(70, 70, Math.toRadians(500), Math.toRadians(500), 15)
                 .build();
 
-
-        TrajectoryActionBuilder path1 = myBot.getDrive().actionBuilder(new Pose2d(9, -62, Math.toRadians(0)))
-                .setTangent(Math.toRadians(113))
-                .lineToYLinearHeading(-32.5, Math.toRadians(270))
-                .waitSeconds(3)
-
-                //move to the cage
+        TrajectoryActionBuilder placeSpecimenPath = rightNoSpline.getDrive().actionBuilder(new Pose2d(8, -62, Math.toRadians(270)))
+                .setTangent(Math.toRadians(105))
+                .lineToYLinearHeading(-32, Math.toRadians(270))
+                .waitSeconds(1)
                 ;
 
-
-        TrajectoryActionBuilder path2 = path1.endTrajectory().fresh()
-                .setTangent(Math.toRadians(280))
-                .lineToYLinearHeading(-40, Math.toRadians(270))
-                //move back from the cage
-
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(35, Math.toRadians(0))
-
-                .setTangent(Math.toRadians(90))
-                .lineToYLinearHeading(-20, Math.toRadians(0))
-
-                .setTangent(Math.toRadians(45))
-                .lineToYLinearHeading(-10,Math.toRadians(0))
-                // first push point
-
-                .setTangent(Math.toRadians(270))
-                .lineToYLinearHeading(-50, Math.toRadians(0))
-
-                .setTangent(Math.toRadians(90))
-                .lineToY(-10)
-
-                .setTangent(Math.toRadians(0))
-                .lineToX(57)
-
-                .setTangent(Math.toRadians(270))
-                .lineToYLinearHeading(-50, Math.toRadians(0))
-
-                .setTangent(Math.toRadians(180))
-                .lineToX(36)
-
-                .setTangent(Math.toRadians(227))
-                .lineToX(29)
+        TrajectoryActionBuilder grabPlaceFirstSample = placeSpecimenPath.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(32, -38.5), Math.toRadians(0.00))
+                .turn(Math.toRadians(42))
+                .waitSeconds(0.5)
+                .turn(Math.toRadians(-84))
+                .turn(Math.toRadians(42))
+                ;
+        TrajectoryActionBuilder grabPlaceSecondSample = grabPlaceFirstSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(48, -38.5), Math.toRadians(0.00))
+                .turn(Math.toRadians(42))
+                .waitSeconds(0.5)
+                .turn(Math.toRadians(-84))
+                .turn(Math.toRadians(42))
                 ;
 
-        TrajectoryActionBuilder path3 = path2.endTrajectory().fresh()
-                .setTangent(Math.toRadians(0))
-                .lineToX(40)
+        TrajectoryActionBuilder grabPlaceThirdSample = grabPlaceSecondSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(53, -38.5), Math.toRadians(0.00))
+                .turn(Math.toRadians(42))
+                .waitSeconds(0.5)
+                .turn(Math.toRadians(-84))
                 ;
-
-        TrajectoryActionBuilder path4 = path3.endTrajectory().fresh()
-                .setTangent(Math.toRadians(148))
-                .lineToYLinearHeading(-32.5, Math.toRadians(270))
-                .waitSeconds(3)
-                ;
-
-        TrajectoryActionBuilder path5 = path4.endTrajectory().fresh()
-                .setTangent(Math.toRadians(318))
-                .lineToYLinearHeading(-57.5, Math.toRadians(0))
-                ;
-
-        TrajectoryActionBuilder path6 = path5.endTrajectory().fresh()
-                .setTangent(Math.toRadians(0))
-                .lineToX(40)
-                ;
-
-        TrajectoryActionBuilder path7 = path6.endTrajectory().fresh()
-                .setTangent(Math.toRadians(146))
-                .lineToYLinearHeading(-32.5, Math.toRadians(270))
-                .waitSeconds(3)
-
-                ;
-
-        TrajectoryActionBuilder path8 = path7.endTrajectory().fresh()
-                .setTangent(Math.toRadians(315))
-                .lineToYLinearHeading(-57.5, Math.toRadians(0))
-                ;
-
-        TrajectoryActionBuilder path9 = path8.endTrajectory().fresh()
-                .setTangent(Math.toRadians(0))
-                .lineToX(40)
-                ;
-
-        TrajectoryActionBuilder path10 = path9.endTrajectory().fresh()
-                .setTangent(Math.toRadians(148))
-                .lineToYLinearHeading(-32.5, Math.toRadians(270))
-                .waitSeconds(3)
-
-                ;
-
-        myBot.runAction(
+//        TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
+//                .setReversed(true)
+//                .strafeToConstantHeading(new Vector2d(0.00, -33.00))
+//                .waitSeconds(1)
+//                ;
+//        TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
+//                .setReversed(false)
+//                .strafeToConstantHeading(new Vector2d(35.00, -59.50))
+//                .waitSeconds(0.5)
+//                .strafeToConstantHeading(new Vector2d(35.00, -61.00))
+//                ;
+//
+//        TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+//                .setReversed(true)
+//                .strafeToConstantHeading(new Vector2d(2.00, -33.00))
+//                .waitSeconds(1)
+//                ;
+//
+//        TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
+//                .setReversed(false)
+//                .strafeToConstantHeading(new Vector2d(35.00, -59.50))
+//                .waitSeconds(0.5)
+//                .strafeToConstantHeading(new Vector2d(35.00, -61.00))
+//                ;
+//
+//        TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+//                .setReversed(true)
+//                .strafeToConstantHeading(new Vector2d(1.00, -33.00))
+//                .waitSeconds(1)
+//                ;
+//
+        rightNoSpline.runAction(
                 new SequentialAction(
-                        path1.build(),
-                        path2.build(),
-                        path3.build(),
-                        path4.build(),
-                        path5.build(),
-                        path6.build(),
-                        path7.build(),
-                        path8.build(),
-                        path9.build(),
-                        path10.build()
+                        placeSpecimenPath.build(),
+                        grabPlaceFirstSample.build(),
+                        grabPlaceSecondSample.build(),
+                        grabPlaceThirdSample.build()
+//                        pickUpSecondSpecimen.build(),
+//                        placeSecondSpecimen.build(),
+//                        pickUpThirdSpecimen.build(),
+//                        placeThirdSpecimen.build(),
+//                        pickUpForthSpecimen.build(),
+//                        placeForthSpecimen.build()
+                )
+        );
+
+
+        RoadRunnerBotEntity rightWithSpline = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setConstraints(70, 70, Math.toRadians(180), Math.toRadians(180), 15)
+                .build();
+
+        TrajectoryActionBuilder placeFirstSpecimen = rightWithSpline.getDrive().actionBuilder(new Pose2d(8.00, -62.00, Math.toRadians(270.00)))
+                .setTangent(Math.toRadians(106))
+                .lineToYLinearHeading(-32, Math.toRadians(270))
+                ;
+
+        TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(44, -18), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(44, -52))
+                .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0))
+                ;
+
+
+        TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
+                .strafeToConstantHeading(new Vector2d(53, -18))
+                .strafeToConstantHeading(new Vector2d(53, -61))
+                ;
+
+        TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(1, -35), Math.toRadians(90.00))
+                ;
+
+        TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
+                ;
+
+        TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(2, -32), Math.toRadians(90.00))
+                ;
+
+        TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
+                ;
+
+        TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(4, -32), Math.toRadians(90.00))
+                ;
+
+        TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(27.09, -53.07, Math.toRadians(320.00)), Math.toRadians(320.00))
+                ;
+
+
+        rightWithSpline.runAction(
+                new SequentialAction(
+
+                        placeFirstSpecimen.build(),
+                        pushPath.build(),
+                        pickUpSecondSpecimen.build(),
+                        placeSecondSpecimen.build(),
+                        pickUpThirdSpecimen.build(),
+                        placeThirdSpecimen.build(),
+                        pickUpForthSpecimen.build(),
+                        placeForthSpecimen.build(),
+                        park.build()
+
+//                        pickUpForthSpecimen.build(),
+//                        placeForthSpecimen.build()
+//                        pickUpThirdSpecimen.build(),
+//                        placeThirdSpecimen.build(),
+//                        pickUpForthSpecimen.build(),
+//                        placeForthSpecimen.build()
+
                 )
         );
 
@@ -127,7 +181,11 @@ public class MeepMeepTesting {
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
-                .addEntity(myBot)
+//                .addEntity(rightNoSpline)
+                .addEntity(rightWithSpline)
+//                .addEntity(left)
+//                .addEntity(testBot)
+//                .addEntity(testBot1)
                 .start();
     }
 }

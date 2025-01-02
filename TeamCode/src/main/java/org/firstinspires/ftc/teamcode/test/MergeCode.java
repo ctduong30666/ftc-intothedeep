@@ -1,33 +1,26 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.opencv.core.Point;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
-@Config
-@TeleOp(name = "Final TeleOp")
+@Disabled
+//@Config
+//@TeleOp(name = "Final TeleOp")
 public class MergeCode extends OpMode {
 
     // Motors
@@ -96,7 +89,6 @@ public class MergeCode extends OpMode {
 
     //adaptiveClaw camera = new adaptiveClaw();
 
-    Point center;
     double angle;
     double lat;
     double lon;
@@ -110,14 +102,10 @@ public class MergeCode extends OpMode {
     //public double armPower;
     public double wristPower;
 
-    private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
-    private static final int CAMERA_WIDTH = 640; // width  of wanted camera resolution
-    private static final int CAMERA_HEIGHT = 360; // height of wanted camera resolution
 
     public double power;
 
 
-    SampleDetection pipeline = new SampleDetection();
 
 
     @Override
@@ -175,24 +163,12 @@ public class MergeCode extends OpMode {
 
 
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-
-        // Use OpenCvCameraFactory class from FTC SDK to create camera instance
-        controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-        controlHubCam.setPipeline(pipeline);
-
-        controlHubCam.openCameraDevice();
-        controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
 
 
         left = hardwareMap.get(CRServo.class, "leftServo");
         right = hardwareMap.get(CRServo.class, "rightServo");
         claw = hardwareMap.get(Servo.class, "clawServo");
 
-        FtcDashboard.getInstance().startCameraStream(controlHubCam, 30);
 
         runtime = new ElapsedTime();
 
@@ -329,85 +305,8 @@ public class MergeCode extends OpMode {
         telemetry.addData("Slides Position", currentSlidePosition);
 
 
-
-        if(gamepad2.x){ // moving to centralize the claw
-            angle = pipeline.returnAngle();
-            center = pipeline.returnCenter();
-
-            double x = center.x;
-            double y = center.y;
-            if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
-                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), -(y-180)/Math.sqrt((x*x)+(y*y)), 0);
-            } else if(Math.abs(angle-90)>3){
-                power = (90-angle)/90;
-                left.setPower(power);
-                right.setPower(power); //setting the angle
-            } else {
-                claw.setPosition(1.0); //open the claw
-            }
-
-
-        } else { // move normally using gamepad1
-            robotOrientation = imu.getRobotYawPitchRollAngles();
-            robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
-
-            double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
-            double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
-            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
-
-            //  || Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate) > 1
-            if (Math.abs(rightStickX) > 0.1) {
-                targetYaw = robotYaw;
-                lastError = 0;
-            }
-
-            if (gamepad1.x) {
-                imu.resetYaw();
-                targetYaw = 0;
-                integralSum = 0;
-                lastError = 0;
-            }
-
-            // PID Calculations
-            double error = targetYaw - robotYaw;
-            error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
-
-            // Compute PID Terms
-            double derivative = (error - lastError) / timer.seconds();
-            integralSum += error * timer.seconds();
-            double correction = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
-
-            double rotationPower = Math.abs(rightStickX) > 0.1 ? rightStickX : -correction;
-
-            frontLeft.setPower((rotY + rotX + rotationPower) / denominator);
-            frontRight.setPower((rotY - rotX - rotationPower) / denominator);
-            backLeft.setPower((rotY - rotX + rotationPower) / denominator);
-            backRight.setPower((rotY + rotX - rotationPower) / denominator);
-
-            lastError = error;
-            timer.reset();
-
-            packet.put("Target: ", Math.toDegrees(targetYaw));
-            packet.put("Actual: ", Math.toDegrees(robotYaw));
-            packet.put("Error: ", Math.toDegrees(error));
-            packet.put("Yaw Acceleration", Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
-
-
-            telemetry.addData("Angle: ", angle);
-            telemetry.addData("Latitude: ", lat);
-            telemetry.addData("Longitude: ", lon);
-            telemetry.addData("Center: ", center);
-            telemetry.addData("Xpower", leftStickX);
-
-            telemetry.addData("Ypower", leftStickY);
-        }
-
-
-        /*
         robotOrientation = imu.getRobotYawPitchRollAngles();
-
         robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
-        robotYaw = (robotYaw + Math.PI) % (2 * Math.PI) - Math.PI;
 
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
@@ -430,10 +329,6 @@ public class MergeCode extends OpMode {
         double error = targetYaw - robotYaw;
         error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
 
-        if (Math.abs(error) < Math.toRadians(2)) { // 2Â° tolerance
-            error = 0;
-        }
-
         // Compute PID Terms
         double derivative = (error - lastError) / timer.seconds();
         integralSum += error * timer.seconds();
@@ -449,18 +344,21 @@ public class MergeCode extends OpMode {
         lastError = error;
         timer.reset();
 
-        //telemetry.addData("Angle: ", angle);
-        //telemetry.addData("Latitude: ", lat);
-        //telemetry.addData("Longitude: ", lon);
-        //telemetry.addData("Center: ", center);
-        //telemetry.addData("Xpower", leftStickX);
+        packet.put("Target: ", Math.toDegrees(targetYaw));
+        packet.put("Actual: ", Math.toDegrees(robotYaw));
+        packet.put("Error: ", Math.toDegrees(error));
+        packet.put("Yaw Acceleration", Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
 
-        //telemetry.addData("Ypower", leftStickY);
 
-        // FTC Dashboard
-        telemetry.update();
-        //dashboard.sendTelemetryPacket(packet);
-         */
+        telemetry.addData("Angle: ", angle);
+        telemetry.addData("Latitude: ", lat);
+        telemetry.addData("Longitude: ", lon);
+        telemetry.addData("Xpower", leftStickX);
+
+        telemetry.addData("Ypower", leftStickY);
+
+
+
     }
 
     public int moveSlides(int position){
