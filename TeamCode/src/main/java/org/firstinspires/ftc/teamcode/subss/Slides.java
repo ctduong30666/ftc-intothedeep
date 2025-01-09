@@ -43,9 +43,18 @@ public class Slides {
 
     }
 
-    public void pickupSample(int slidesPosition) {
-        leftSlide.setTargetPosition(slidesPosition);
-        rightSlide.setTargetPosition(slidesPosition);
+    public void pickupSample() {
+        leftSlide.setTargetPosition(1300);
+        rightSlide.setTargetPosition(1300);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(velocity);
+        rightSlide.setVelocity(velocity);
+    }
+
+    public void hangExtend(){
+        leftSlide.setTargetPosition(1100);
+        rightSlide.setTargetPosition(1100);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -62,8 +71,8 @@ public class Slides {
     }
 
     public void placeSpecimen() {
-        leftSlide.setTargetPosition(900);
-        rightSlide.setTargetPosition(900);
+        leftSlide.setTargetPosition(850);
+        rightSlide.setTargetPosition(850);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -79,10 +88,15 @@ public class Slides {
         rightSlide.setVelocity(velocity);
     }
 
-    public void moveSlidesManual(double joystick) {
-        leftSlide.setVelocity(joystick * 1000);
-        rightSlide.setVelocity(joystick * 1000);
-    }
+//    public void moveSlidesManual(double joystick) {
+//        if (joystick > 0.3 || joystick < 0.3) {
+//            leftSlide.setPower(joystick);
+//            rightSlide.setPower(joystick);
+//        } else {
+//            leftSlide.setPower(0);
+//            rightSlide.setPower(0);
+//        }
+//    }
 
 
     public int leftGetCurrentPosition() {

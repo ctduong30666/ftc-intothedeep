@@ -31,8 +31,6 @@ public class TeleOp extends OpMode {
     Claw claw = new Claw(this);
 
     public boolean switchMode = true;
-    public boolean switchPosition = true;
-    public int slidesTargetPosition = 1100;
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -124,15 +122,7 @@ public class TeleOp extends OpMode {
 
         //Gamepad Controll
 
-        slides.moveSlidesManual(gamepad2.left_stick_y);
-
-        if (gamepad2.left_bumper && gamepad2.right_bumper) {
-            switchPosition = !switchPosition;
-            slidesTargetPosition = 1500;
-        } else if (gamepad2.left_bumper && gamepad2.right_bumper && !switchPosition) {
-            switchPosition = !switchPosition;
-            slidesTargetPosition = 1100;
-        }
+//        slides.moveSlidesManual(gamepad2.left_stick_y);
 
 
         if(gamepad2.dpad_up && switchMode) {
@@ -199,19 +189,18 @@ public class TeleOp extends OpMode {
 
 
         if(gamepad2.left_trigger > 0.3) {
-            arm.resetArm();
+            armHang();
         }
+        if(gamepad2.right_trigger > 0.3) {
+            slides.hangExtend();
+        }
+
 
 
         if(switchMode) {
             telemetry.addData("MODE", "SAMPLE");
         } else {
             telemetry.addData("MODE", "SPECIMEN");
-        }
-        if(switchPosition) {
-            telemetry.addData("Position", "1100");
-        } else {
-            telemetry.addData("Position", "1500");
         }
 
         telemetry.addData("Yaw: ", Math.toDegrees(robotYaw));
@@ -231,6 +220,15 @@ public class TeleOp extends OpMode {
     }
 
 
+    public void armHang() {
+        arm.readyForHang();
+        if (armReachedTarget(200, 50)) {
+            slides.hangExtend();
+        }
+        if (slidesReachedTarget(1100, 50)) {
+            arm.moveUp();
+        }
+    }
 
 
     public void placeSample() {
@@ -255,7 +253,7 @@ public class TeleOp extends OpMode {
     }
     public void pickupSample() {
         claw.openClaw();
-        slides.pickupSample(slidesTargetPosition);
+        slides.pickupSample();
     }
 
     public void resetSlides() {
