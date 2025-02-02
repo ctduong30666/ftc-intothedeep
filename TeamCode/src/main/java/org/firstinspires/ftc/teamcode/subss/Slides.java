@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Slides {
     DcMotorEx leftSlide;
@@ -11,6 +12,10 @@ public class Slides {
 
     public Encoder leftSlideEncoder;
     public Encoder rightSlideEncoder;
+
+    ElapsedTime timer = new ElapsedTime();
+
+    public boolean isReset = false;
 
     OpMode opMode;
 
@@ -40,7 +45,9 @@ public class Slides {
         rightSlideEncoder = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rightSlide"));
         rightSlideEncoder.setDirection(Encoder.Direction.REVERSE);
 
+        ElapsedTime timer = new ElapsedTime();
 
+//        resetSlides();
     }
 
     public void pickupSample() {
@@ -70,9 +77,26 @@ public class Slides {
         rightSlide.setVelocity(velocity);
     }
 
+    public void placeSampleLow() {
+        leftSlide.setTargetPosition(700);
+        rightSlide.setTargetPosition(700);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(velocity);
+        rightSlide.setVelocity(velocity);
+    }
+
+    public void getReadyPlaceSpecimen() {
+        leftSlide.setTargetPosition(540);
+        rightSlide.setTargetPosition(540);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(velocity);
+        rightSlide.setVelocity(velocity);
+    }
     public void placeSpecimen() {
-        leftSlide.setTargetPosition(850);
-        rightSlide.setTargetPosition(850);
+        leftSlide.setTargetPosition(1050);
+        rightSlide.setTargetPosition(1050);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -88,16 +112,14 @@ public class Slides {
         rightSlide.setVelocity(velocity);
     }
 
-//    public void moveSlidesManual(double joystick) {
-//        if (joystick > 0.3 || joystick < 0.3) {
-//            leftSlide.setPower(joystick);
-//            rightSlide.setPower(joystick);
-//        } else {
-//            leftSlide.setPower(0);
-//            rightSlide.setPower(0);
-//        }
-//    }
-
+    public void stop() {
+        leftSlide.setTargetPosition(0);
+        rightSlide.setTargetPosition(0);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(0);
+        rightSlide.setVelocity(0);
+    }
 
     public int leftGetCurrentPosition() {
         return leftSlide.getCurrentPosition();
@@ -106,7 +128,22 @@ public class Slides {
     public int rightGetCurrentPosition() {
         return rightSlide.getCurrentPosition();
     }
+    public void resetSlides() {
+        if (!isReset) {
+            leftSlide.setTargetPosition(0);
+            rightSlide.setTargetPosition(0);
+            leftSlide.setPower(-1);
+            rightSlide.setPower(-1);
+            timer.reset();
+            isReset = true;
+        }
 
+        if (isReset && timer.seconds() > 1.0) {
+            leftSlide.setPower(0);
+            rightSlide.setPower(0);
+            resetEncoder();
+        }
+    }
 
     public void resetEncoder() {
         leftSlideEncoder.reset();

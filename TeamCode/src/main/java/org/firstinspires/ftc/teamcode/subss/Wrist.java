@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 
 public class Wrist {
-    Servo leftClaw;
-    Servo rightClaw;
+    Servo wristServo;
+    Servo rotateServo;
     OpMode opMode;
 
     public Wrist(OpMode _opMode) {
@@ -14,50 +14,58 @@ public class Wrist {
     }
 
     public void init() {
-        leftClaw = opMode.hardwareMap.get(Servo.class, "leftServo");
-        rightClaw = opMode.hardwareMap.get(Servo.class, "rightServo");
+        wristServo = opMode.hardwareMap.get(Servo.class, "wristServo"); //leftServo
+        rotateServo = opMode.hardwareMap.get(Servo.class, "rotateServo"); //rightServo
+
+
     }
 
     public void Up() {
-        leftClaw.setPosition(-1);
-        rightClaw.setPosition(0.666);
+        wristServo.setPosition(0);
+        rotateServo.setPosition(0.5);
     }
 
     public void Down() {
-        leftClaw.setPosition(0.466);
-        rightClaw.setPosition(0.35);
-    }
-    public void PickUp0() {
-        leftClaw.setPosition(0.466);
-        rightClaw.setPosition(0.35);
+        wristServo.setPosition(1);
+        rotateServo.setPosition(0.5);
     }
 
-    public void PickUp45() {
-        leftClaw.setPosition(0);
-        rightClaw.setPosition(0);
+    public void ReadyPlaceSample() {
+        wristServo.setPosition(0.35);
+        rotateServo.setPosition(0.5);
+    }
+
+    public void PlaceSample() {
+        wristServo.setPosition(0.4); //0.45
+        rotateServo.setPosition(0.5);
+    }
+
+    public void PickUp0() {
+        wristServo.setPosition(1);
+        rotateServo.setPosition(0.16);
+    }
+
+    public void PickUp45Right() {
+        wristServo.setPosition(1);
+        rotateServo.setPosition(0.33);
+    }
+
+    public void PickUp45Left() {
+        wristServo.setPosition(1);
+        rotateServo.setPosition(0.67);
     }
 
     public void PickUp90() {
-        leftClaw.setPosition(0.168);
-        rightClaw.setPosition(0.2);
-    }
-    public void PlaceSpecimen() {
-        leftClaw.setPosition(0.088);
-        rightClaw.setPosition(0.652);
+        wristServo.setPosition(1);
+        rotateServo.setPosition(0.5);
     }
 
-    public void PickUpSpecimen() {
-        leftClaw.setPosition(0.182);
-        rightClaw.setPosition(0.55);
-    }
+    public void PickUpSpecimen() {}
 
-    public void PickUpSpecimenGround() {
-        leftClaw.setPosition(0.239);
-        rightClaw.setPosition(0.46);
-    }
+
 
     public boolean isUp() {
-        if (leftClaw.getPosition() != -1 && rightClaw.getPosition() != 0.666) {
+        if (wristServo.getPosition() != 0) {
             return false;
         }
         return true;
